@@ -1,8 +1,8 @@
 package com.blue.rms.user.service.impl
 
-import com.blue.rms.auth.dto.UserDto
+import com.blue.rms.user.dto.UserDto
 import com.blue.rms.user.entity.UserEntity
-import com.blue.rms.auth.mapper.toUserDto
+import com.blue.rms.user.mapper.toUserDto
 import com.blue.rms.common.util.requestUserId
 import com.blue.rms.common.util.requestUserRole
 import com.blue.rms.config.security.PasswordEncoder
@@ -14,8 +14,14 @@ import com.blue.rms.exception.UserNotFoundException
 import com.blue.rms.user.repository.UserRepository
 import com.blue.rms.user.service.UserService
 import com.blue.rms.user.util.enums.UserRole
+import com.blue.rms.user.util.enums.UserStatus
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+import java.util.UUID
 
 @Service
 class UserServiceImpl(
@@ -25,6 +31,8 @@ class UserServiceImpl(
     override fun createUser(
         email: String,
         password: String,
+        firstName: String,
+        lastName: String,
         role: UserRole
     ): UserDto {
         val trimmedEmail = email.trim()
@@ -42,7 +50,9 @@ class UserServiceImpl(
             UserEntity(
                 email = email,
                 hashedPassword = passwordEncoder.encodePassword(password)!!,
-                role = role
+                role = role,
+                firstName = firstName,
+                lastName = lastName
             )
         ).toUserDto()
     }
@@ -78,5 +88,26 @@ class UserServiceImpl(
             UserRole.MANAGER -> target in listOf(UserRole.STAFF, UserRole.CASHIER)
             else -> false
         }
+    }
+
+    override fun getAllUsers(pageable: Pageable): Page<UserDto> {
+        return userRepository.findAll(pageable).map { it.toUserDto() }
+    }
+
+    override fun searchUsers(role: UserRole?, name: String?, pageable: Pageable): Page<UserDto> {
+        return userRepository.searchUsersByRoleAndName(role, name, pageable).map { it.toUserDto() }
+    }
+
+    @Transactional
+    override fun inactiveUser(id: UUID) {
+        val user = userRepository.findByIdOrNull(id)
+            ?: throw UserNotFoundException()
+
+        if(user.id == id) {
+            throw ForbiddenException("You are not allowed to inactive yourself")
+        }
+
+        user.status = UserStatus.INACTIVE
+        userRepository.save(user)
     }
 }

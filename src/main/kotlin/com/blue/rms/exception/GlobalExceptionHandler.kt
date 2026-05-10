@@ -75,4 +75,66 @@ class GlobalExceptionHandler {
             )
     }
 
+    @ExceptionHandler(CategoryAlreadyExistsException::class)
+    fun onCategoryExists(ex: CategoryAlreadyExistsException) = ResponseEntity(
+        ErrorResponse(
+            message = ex.message ?: "Category already exists",
+            code = "CATEGORY_EXISTS"
+        ),
+        HttpStatus.CONFLICT
+    )
+
+    @ExceptionHandler(CategoryNotFoundException::class)
+    fun onCategoryNotFound(ex: CategoryNotFoundException) = ResponseEntity(
+        ErrorResponse(
+            message = ex.message ?: "Category Not Found",
+            code = "CATEGORY_NOT_FOUND"
+        ),
+        HttpStatus.NOT_FOUND
+    )
+
+    @ExceptionHandler(ComboNotFoundException::class)
+    fun onComboNotFound(ex: ComboNotFoundException) = ResponseEntity(
+        ErrorResponse(
+            message = ex.message ?: "Combo Not Found",
+            code = "COMBO_NOT_FOUND"
+        ),
+        HttpStatus.NOT_FOUND
+    )
+
+    @ExceptionHandler(DishNotFoundException::class)
+    fun onDishNotFound(ex: DishNotFoundException) = ResponseEntity(
+        ErrorResponse(
+            message = ex.message ?: "Dish Not Found",
+            code = "DISH_NOT_FOUND"
+        ),
+        HttpStatus.NOT_FOUND
+    )
+
+    @ExceptionHandler(OptionsNotFoundException::class)
+    fun onOptionsNotFound(ex: OptionsNotFoundException) = ResponseEntity(
+        ErrorResponse(
+            message = ex.message ?: "Options Not Found",
+            code = "OPTIONS_NOT_FOUND"
+        ),
+        HttpStatus.NOT_FOUND
+    )
+
+    @ExceptionHandler(UnauthorizedException::class)
+    fun onUnauthorized(ex: UnauthorizedException) = ResponseEntity(
+        ErrorResponse(
+            message = ex.message ?: "Unauthorized Access",
+            code = "UNAUTHORIZED"
+        ),
+        HttpStatus.UNAUTHORIZED
+    )
+
+    @ExceptionHandler(ForbiddenException::class)
+    fun onForbidden(ex: ForbiddenException) = ResponseEntity(
+        ErrorResponse(
+            message = ex.message ?: "Access Forbidden",
+            code = "FORBIDDEN"
+        ),
+        HttpStatus.FORBIDDEN
+    )
 }
