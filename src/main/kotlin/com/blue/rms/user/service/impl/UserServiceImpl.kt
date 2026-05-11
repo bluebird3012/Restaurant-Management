@@ -103,7 +103,7 @@ class UserServiceImpl(
         val user = userRepository.findByIdOrNull(id)
             ?: throw UserNotFoundException()
 
-        if(user.id == id) {
+        if(user.id == requestUserId) {
             throw ForbiddenException("You are not allowed to inactive yourself")
         }
 
